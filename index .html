@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COSTA GALVÃO — Sistema Familiar de Gestão de Patrimônio</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0f1e;--bg2:#111827;--card:#1a2235;--card2:#1f2d45;
+  --border:#2a3a5c;--border2:#3a4f70;
+  --gold:#c9a84c;--gold2:#e6c06a;--gold-dim:#7a6030;
+  --blue:#3b82f6;--blue2:#60a5fa;
+  --green:#10b981;--green2:#34d399;
+  --red:#ef4444;--red2:#f87171;
+  --purple:#8b5cf6;--purple2:#a78bfa;
+  --teal:#14b8a6;--teal2:#2dd4bf;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --radius:12px;--radius2:8px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ── DISCLAIMER ── */
+#disclaimer{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;display:flex;align-items:center;justify-content:center;padding:20px}
+.disc-box{background:var(--card);border:1px solid var(--gold-dim);border-radius:16px;padding:36px 32px;max-width:520px;width:100%;text-align:center}
+.disc-icon{font-size:36px;margin-bottom:12px}
+.disc-title{font-size:18px;font-weight:700;color:var(--gold2);margin-bottom:12px}
+.disc-text{font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:24px}
+.disc-text b{color:var(--text)}
+
+/* ── AUTH ── */
+#auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0a0f1e 0%,#111827 50%,#0d1a2e 100%)}
+.auth-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:48px 40px;width:420px;max-width:95vw;text-align:center}
+.auth-logo{font-size:13px;font-weight:700;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.auth-title{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-0.5px;margin-bottom:4px}
+.auth-sub{color:var(--text3);font-size:12px;margin-bottom:32px}
+.auth-avatars{display:flex;gap:12px;justify-content:center;margin-bottom:28px;flex-wrap:wrap}
+.avatar-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 16px;border-radius:14px;border:2px solid var(--border);background:var(--card2);cursor:pointer;transition:all .2s;min-width:76px}
+.avatar-btn:hover,.avatar-btn.selected{border-color:var(--gold);background:rgba(201,168,76,.1)}
+.avatar-icon{font-size:28px;line-height:1}
+.avatar-name{font-size:11px;color:var(--text2);font-weight:600}
+.pin-section{margin-top:16px}
+.pin-label{font-size:12px;color:var(--text3);margin-bottom:8px;text-align:left}
+.pin-input{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-size:20px;letter-spacing:8px;text-align:center}
+.pin-input:focus{outline:none;border-color:var(--gold)}
+.btn-primary{width:100%;background:var(--gold);color:#0a0f1e;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:12px;letter-spacing:.3px}
+.btn-primary:hover{background:var(--gold2);transform:translateY(-1px)}
+.auth-msg{font-size:12px;color:var(--red2);margin-top:8px;min-height:16px;text-align:center}
+.auth-hint{font-size:11px;color:var(--text3);margin-top:16px;line-height:1.6;background:var(--card2);border-radius:8px;padding:10px 12px;text-align:left}
+
+/* ── APP ── */
+#app{display:none;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-brand{display:flex;flex-direction:column;gap:1px}
+.topbar-eyebrow{font-size:9px;color:var(--gold-dim);letter-spacing:2px;text-transform:uppercase;font-weight:700}
+.topbar-logo{font-size:15px;font-weight:700;color:var(--gold2);letter-spacing:-0.3px}
+.topbar-user{display:flex;align-items:center;gap:10px}
+.topbar-avatar{font-size:20px;background:var(--card2);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:2px solid var(--gold-dim)}
+.topbar-name{font-size:13px;color:var(--text2)}
+.btn-logout{background:none;border:1px solid var(--border);color:var(--text3);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .2s}
+.btn-logout:hover{border-color:var(--red);color:var(--red2)}
+
+/* NAV */
+.nav-tabs{background:var(--card2);border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:0;overflow-x:auto}
+.nav-tab{padding:13px 18px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;user-select:none}
+.nav-tab:hover{color:var(--text)}
+.nav-tab.active{color:var(--gold2);border-bottom-color:var(--gold2)}
+
+/* MAIN */
+.main{padding:24px;max-width:1200px;margin:0 auto}
+.section{display:none}
+.section.active{display:block}
+
+/* SECTION HEADER */
+.section-header{margin-bottom:20px}
+.section-title{font-size:20px;font-weight:700;color:var(--gold2)}
+.section-desc{font-size:13px;color:var(--text2);margin-top:4px}
+
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.stat-value{font-size:24px;font-weight:700;color:var(--gold2)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:4px}
+.stat-badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;margin-top:6px;display:inline-block}
+.badge-green{background:rgba(16,185,129,.15);color:var(--green2)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--blue2)}
+.badge-gold{background:rgba(201,168,76,.15);color:var(--gold2)}
+
+/* CHART */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px}
+.chart-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.chart-sub{font-size:12px;color:var(--text3);margin-bottom:20px}
+.chart-area{width:100%;height:300px}
+
+/* GOAL PROGRESS */
+.goal-progress{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px}
+.goal-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:14px}
+.goal-name{font-size:16px;font-weight:700;color:var(--gold2)}
+.goal-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.goal-pct{font-size:28px;font-weight:700;color:var(--green2)}
+.progress-bar-bg{background:var(--card2);border-radius:20px;height:12px;overflow:hidden;margin-bottom:10px}
+.progress-bar-fill{background:linear-gradient(90deg,var(--green),var(--teal));height:100%;border-radius:20px;transition:width .8s}
+.goal-values{display:flex;justify-content:space-between;font-size:12px;color:var(--text3)}
+
+/* ONBOARD */
+.onboard-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px;max-width:560px;margin:0 auto}
+.onboard-title{font-size:20px;font-weight:700;color:var(--gold2);margin-bottom:6px}
+.onboard-sub{color:var(--text2);font-size:13px;margin-bottom:28px;line-height:1.6}
+
+/* FORM */
+.form-group{margin-bottom:18px}
+.form-label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+.form-input,.form-select{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:var(--radius2);padding:11px 14px;color:var(--text);font-size:14px}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--gold)}
+.form-select{appearance:none;cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* ALLOC */
+.alloc-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.alloc-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.alloc-title{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:16px}
+.alloc-bar-wrap{margin-bottom:12px}
+.alloc-bar-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:12px}
+.alloc-bar-bg{background:var(--card2);border-radius:4px;height:8px;overflow:hidden}
+.alloc-bar-fill{height:100%;border-radius:4px;transition:width .5s}
+
+/* ADVISORY */
+.advisory-grid{display:grid;gap:16px;margin-bottom:24px}
+.advisory-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}
+.advisory-title{font-size:14px;font-weight:600;margin-bottom:6px}
+.advisory-text{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px}
+.advisory-theory{background:var(--card2);border-left:3px solid var(--gold-dim);border-radius:0 var(--radius2) var(--radius2) 0;padding:12px 14px;font-size:12px;color:var(--text3);line-height:1.6}
+.advisory-badge{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;white-space:nowrap;align-self:start}
+.badge-comprar{background:rgba(16,185,129,.2);color:var(--green2);border:1px solid rgba(16,185,129,.3)}
+.badge-rebalancear{background:rgba(59,130,246,.2);color:var(--blue2);border:1px solid rgba(59,130,246,.3)}
+.badge-aguardar{background:rgba(148,163,184,.1);color:var(--text2);border:1px solid var(--border)}
+
+/* APORTE FORM */
+.aporte-form{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px}
+.aporte-title{font-size:15px;font-weight:600;margin-bottom:16px}
+
+/* HISTORY TABLE */
+.history-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.history-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.history-title{font-size:14px;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 16px;text-align:left;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;background:var(--card2)}
+td{padding:11px 16px;font-size:13px;border-top:1px solid var(--border)}
+tr:hover td{background:rgba(255,255,255,.02)}
+.amount-pos{color:var(--green2);font-weight:600}
+
+/* BTNS */
+.btn-sm{padding:7px 14px;border-radius:7px;border:1px solid var(--border);background:var(--card2);color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s}
+.btn-sm:hover{border-color:var(--gold-dim);color:var(--gold2)}
+.btn-add{background:var(--gold);color:#0a0f1e;border-color:var(--gold);font-weight:700}
+.btn-add:hover{background:var(--gold2);color:#0a0f1e}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:440px;max-width:94vw;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:18px;color:var(--gold2)}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+
+/* DONUT */
+.donut-wrap{display:flex;flex-direction:column;align-items:center}
+.donut-legend{display:flex;flex-direction:column;gap:6px;margin-top:12px;width:100%}
+.legend-row{display:flex;align-items:center;justify-content:space-between;font-size:12px}
+.legend-dot{width:8px;height:8px;border-radius:50%;margin-right:7px;flex-shrink:0}
+.legend-left{display:flex;align-items:center}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty-title{font-size:16px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.empty-text{font-size:13px;line-height:1.6}
+
+/* FOOTER DISCLAIMER */
+.footer-disc{text-align:center;padding:16px 24px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);margin-top:32px;line-height:1.6}
+
+@media(max-width:640px){
+  .alloc-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .advisory-card{grid-template-columns:1fr}
+  .topbar-name{display:none}
+  .main{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ DISCLAIMER INICIAL ═══════════════════════════════════════════════════ -->
+<div id="disclaimer">
+  <div class="disc-box">
+    <div class="disc-icon">⚖️</div>
+    <div class="disc-title">Aviso Importante</div>
+    <div class="disc-text">
+      Este sistema é de <b>uso educacional e familiar exclusivo</b>, destinado à organização e visualização do planejamento financeiro pessoal da família Costa Galvão.<br><br>
+      As projeções são <b>estimativas baseadas em premissas históricas</b> do mercado brasileiro e <b>não constituem consultoria de investimentos</b> nos termos da Resolução CVM 19/2021.<br><br>
+      <b>Nenhuma informação aqui apresentada deve ser interpretada como recomendação de compra ou venda de ativos financeiros.</b> Para decisões de investimento, consulte sempre um profissional certificado (CFP®, CNPI ou assessor habilitado).
+    </div>
+    <button class="btn-primary" onclick="document.getElementById('disclaimer').style.display='none'">Entendi — Acessar o Sistema</button>
+  </div>
+</div>
+
+<!-- ═══ TELA DE LOGIN ═══════════════════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">Costa Galvão</div>
+    <div class="auth-title">Gestão de Patrimônio</div>
+    <div class="auth-sub">Sistema Familiar · Selecione seu perfil</div>
+    <div class="auth-avatars" id="auth-avatars"></div>
+    <div class="pin-section" id="pin-section" style="display:none">
+      <div class="pin-label">PIN de 4 dígitos</div>
+      <input class="pin-input" type="password" id="pin-input" maxlength="4" inputmode="numeric" placeholder="••••" autocomplete="off">
+      <button class="btn-primary" onclick="doLogin()">Entrar</button>
+      <div class="auth-msg" id="auth-msg"></div>
+    </div>
+    <div class="auth-hint">
+      💡 <b>PIN padrão de todos os usuários: 1234.</b><br>
+      Para alterar, abra o arquivo HTML e edite o campo <code>pin</code> de cada usuário na seção USERS.
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APLICATIVO PRINCIPAL ════════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-eyebrow">Costa Galvão</div>
+      <div class="topbar-logo">Sistema Familiar de Gestão de Patrimônio</div>
+    </div>
+    <div class="topbar-user">
+      <div class="topbar-avatar" id="tb-avatar"></div>
+      <div class="topbar-name" id="tb-name"></div>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showSection('painel',this)">📊 Painel</div>
+    <div class="nav-tab" onclick="showSection('objetivo',this)">🎯 Objetivo</div>
+    <div class="nav-tab" onclick="showSection('alocacao',this)">🧩 Alocação</div>
+    <div class="nav-tab" onclick="showSection('consultoria',this)">💡 Consultoria</div>
+    <div class="nav-tab" onclick="showSection('historico',this)">📋 Histórico</div>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="main">
+
+    <!-- PAINEL -->
+    <div class="section active" id="s-painel">
+      <div class="section-header">
+        <div class="section-title" id="painel-title">Bem-vindo 👋</div>
+        <div class="section-desc">Visão consolidada do seu patrimônio familiar</div>
+      </div>
+      <div class="cards-grid" id="cards-grid"></div>
+      <div id="goal-progress-wrap"></div>
+      <div class="chart-card">
+        <div class="chart-title">Projeção de Patrimônio</div>
+        <div class="chart-sub">Crescimento estimado com aportes mensais e juros compostos · Premissas baseadas em médias históricas do mercado brasileiro</div>
+        <div class="chart-area" id="chart-area"></div>
+      </div>
+      <div class="footer-disc">⚖️ Sistema de uso educacional e familiar. Projeções são estimativas e não constituem consultoria de investimentos (CVM Res. 19/2021). Consulte um profissional certificado para decisões de investimento.</div>
+    </div>
+
+    <!-- OBJETIVO -->
+    <div class="section" id="s-objetivo">
+      <div class="section-header">
+        <div class="section-title">🎯 Meu Objetivo</div>
+        <div class="section-desc">Defina sua meta financeira principal — o norte de todo o planejamento</div>
+      </div>
+      <div id="objetivo-content"></div>
+    </div>
+
+    <!-- ALOCAÇÃO -->
+    <div class="section" id="s-alocacao">
+      <div class="section-header">
+        <div class="section-title">🧩 Alocação de Carteira</div>
+        <div class="section-desc">Distribuição dos seus investimentos e registro de aportes</div>
+      </div>
+      <div id="alocacao-content"></div>
+    </div>
+
+    <!-- CONSULTORIA -->
+    <div class="section" id="s-consultoria">
+      <div class="section-header">
+        <div class="section-title">💡 Consultoria Ativa</div>
+        <div class="section-desc">Orientações educacionais baseadas em Ray Dalio · Benjamin Graham · Gustavo Cerbasi</div>
+      </div>
+      <div id="consultoria-content"></div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="section" id="s-historico">
+      <div class="section-header">
+        <div class="section-title">📋 Histórico de Aportes</div>
+        <div class="section-desc">Registro completo de todos os investimentos realizados</div>
+      </div>
+      <div id="historico-content"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ═══ MODAL: NOVO APORTE ══════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-aporte">
+  <div class="modal-box">
+    <div class="modal-title">💸 Registrar Aporte</div>
+    <div class="form-group">
+      <label class="form-label">Classe de Ativo</label>
+      <select class="form-select" id="m-classe">
+        <option value="Renda Fixa">Renda Fixa (Tesouro, CDB, LCI/LCA)</option>
+        <option value="Ações">Ações (ETFs, fundos, BDRs)</option>
+        <option value="FIIs">Fundos Imobiliários (FIIs)</option>
+        <option value="Internacional">Internacional (ETF global, BDR)</option>
+        <option value="Reserva">Reserva de Emergência</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor aportado (R$)</label>
+      <input class="form-input" type="number" id="m-valor" placeholder="500,00" min="0" step="0.01">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Data do aporte</label>
+      <input class="form-input" type="date" id="m-data">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observação (opcional)</label>
+      <input class="form-input" type="text" id="m-obs" placeholder="Ex: Tesouro IPCA+ 2035, XPLG11...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn-sm btn-add" onclick="saveAporte()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: OBJETIVO ═════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-objetivo">
+  <div class="modal-box">
+    <div class="modal-title">🎯 Definir Objetivo Financeiro</div>
+    <div class="form-group">
+      <label class="form-label">Nome do objetivo</label>
+      <input class="form-input" type="text" id="o-nome" placeholder="Ex: Liberdade Financeira, Casa Própria...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Valor alvo (R$)</label>
+        <input class="form-input" type="number" id="o-valor" placeholder="500000" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Prazo (anos)</label>
+        <input class="form-input" type="number" id="o-prazo" placeholder="20" min="1" max="40">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Aporte mensal pretendido (R$)</label>
+      <input class="form-input" type="number" id="o-aporte" placeholder="1000" min="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Perfil de risco</label>
+      <select class="form-select" id="o-perfil">
+        <option value="conservador">Conservador — segurança em primeiro lugar</option>
+        <option value="moderado" selected>Moderado — equilíbrio entre segurança e crescimento</option>
+        <option value="arrojado">Arrojado — foco em crescimento no longo prazo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Patrimônio já investido hoje (R$)</label>
+      <input class="form-input" type="number" id="o-patrimonio" placeholder="0" min="0">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal()">Cancelar</button>
+      <button class="btn-sm btn-add" onclick="saveObjetivo()">Salvar Objetivo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ JAVASCRIPT ══════════════════════════════════════════════════════════ -->
+<script>
+
+// ── USUÁRIOS FAMILIARES ────────────────────────────────────────────────────────
+// Para alterar o PIN de qualquer usuário, edite o campo "pin" abaixo.
+const USERS = [
+  { id: 'membro1', name: 'Jucineide',  icon: '👩‍💼', pin: '1234' },
+  { id: 'membro2', name: 'Marido',     icon: '👨‍💼', pin: '1234' },
+  { id: 'membro3', name: 'Filho 1',    icon: '🧑',   pin: '1234' },
+  { id: 'membro4', name: 'Filho 2',    icon: '🧒',   pin: '1234' },
+];
+
+let currentUser = null;
+let selectedUser = null;
+
+// ── STORAGE ────────────────────────────────────────────────────────────────────
+function getData(key) {
+  try { return JSON.parse(localStorage.getItem('cg_' + currentUser.id + '_' + key)) || null; }
+  catch { return null; }
+}
+function setData(key, val) {
+  localStorage.setItem('cg_' + currentUser.id + '_' + key, JSON.stringify(val));
+}
+
+// ── AUTH ───────────────────────────────────────────────────────────────────────
+function renderAuth() {
+  document.getElementById('auth-avatars').innerHTML = USERS.map(u => `
+    <div class="avatar-btn" onclick="selectUser('${u.id}')" id="av-${u.id}">
+      <span class="avatar-icon">${u.icon}</span>
+      <span class="avatar-name">${u.name}</span>
+    </div>`).join('');
+}
+
+function selectUser(id) {
+  selectedUser = USERS.find(u => u.id === id);
+  document.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('av-' + id).classList.add('selected');
+  document.getElementById('pin-section').style.display = 'block';
+  document.getElementById('pin-input').value = '';
+  document.getElementById('auth-msg').textContent = '';
+  setTimeout(() => document.getElementById('pin-input').focus(), 100);
+}
+
+function doLogin() {
+  if (!selectedUser) { document.getElementById('auth-msg').textContent = 'Selecione um usuário primeiro.'; return; }
+  const pin = document.getElementById('pin-input').value.trim();
+  if (pin === selectedUser.pin) {
+    currentUser = selectedUser;
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('tb-avatar').textContent = currentUser.icon;
+    document.getElementById('tb-name').textContent = currentUser.name;
+    loadApp();
+  } else {
+    document.getElementById('auth-msg').textContent = 'PIN incorreto. Tente novamente.';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+  }
+}
+
+document.getElementById('pin-input').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function logout() {
+  currentUser = null; selectedUser = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('pin-section').style.display = 'none';
+  document.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', i === 0));
+}
+
+// ── NAVEGAÇÃO ─────────────────────────────────────────────────────────────────
+function showSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  const renders = { painel: renderPainel, objetivo: renderObjetivo, alocacao: renderAlocacao, consultoria: renderConsultoria, historico: renderHistorico };
+  if (renders[id]) renders[id]();
+}
+
+// ── CARGA INICIAL ─────────────────────────────────────────────────────────────
+function loadApp() {
+  const h = new Date().getHours();
+  const gr = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  document.getElementById('painel-title').textContent = `${gr}, ${currentUser.name}! ${currentUser.icon}`;
+  renderPainel();
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function fmt(v) {
+  return 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function getTotalAportado() {
+  return (getData('aportes') || []).reduce((s, a) => s + Number(a.valor), 0);
+}
+
+function getAlocacaoAtual() {
+  const map = {};
+  (getData('aportes') || []).forEach(a => { map[a.classe] = (map[a.classe] || 0) + Number(a.valor); });
+  return map;
+}
+
+function getProjecao() {
+  const obj = getData('objetivo');
+  if (!obj) return [];
+  const P   = Number(obj.patrimonio) || 0;
+  const pmt = Number(obj.aporte) || 0;
+  const anos = Number(obj.prazo) || 20;
+  const taxas = { conservador: 0.09, moderado: 0.11, arrojado: 0.13 };
+  const taxa = (taxas[obj.perfil] || 0.11) / 12;
+  const pts = [];
+  let atual = P;
+  for (let m = 0; m <= anos * 12; m++) {
+    if (m > 0) atual = atual * (1 + taxa) + pmt;
+    if (m % 6 === 0) pts.push({
+      mes: m,
+      valor: Math.round(atual),
+      label: m === 0 ? 'Hoje' : m < 12 ? m + 'm' : Math.round(m / 12) + 'a'
+    });
+  }
+  return pts;
+}
+
+// ── PAINEL ────────────────────────────────────────────────────────────────────
+function renderPainel() {
+  const total   = getTotalAportado();
+  const obj     = getData('objetivo');
+  const proj    = getProjecao();
+  const meta    = obj ? Number(obj.valor) : 0;
+  const pct     = meta > 0 ? Math.min(100, (total / meta * 100)) : 0;
+  const crossIdx = proj.findIndex(p => p.valor >= meta);
+  const prazoLabel = crossIdx >= 0 ? proj[crossIdx].label + ' restantes' : obj ? 'Acima do prazo atual' : '—';
+
+  document.getElementById('cards-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Patrimônio Total</div>
+      <div class="stat-value">${fmt(total)}</div>
+      <div class="stat-sub">soma de todos os aportes registrados</div>
+      <span class="stat-badge badge-gold">💰 Acumulado</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Meta do Objetivo</div>
+      <div class="stat-value">${obj ? fmt(obj.valor) : '—'}</div>
+      <div class="stat-sub">${obj ? obj.nome : 'Defina sua meta em Objetivo'}</div>
+      <span class="stat-badge badge-blue">${pct.toFixed(1)}% concluído</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Aporte Mensal Planejado</div>
+      <div class="stat-value">${obj ? fmt(obj.aporte) : '—'}</div>
+      <div class="stat-sub">valor pretendido por mês</div>
+      <span class="stat-badge badge-green">📅 Plano</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Prazo para a Meta</div>
+      <div class="stat-value">${obj ? obj.prazo + ' anos' : '—'}</div>
+      <div class="stat-sub">${prazoLabel}</div>
+      <span class="stat-badge badge-gold">⏱ Projeção</span>
+    </div>`;
+
+  document.getElementById('goal-progress-wrap').innerHTML = obj ? `
+    <div class="goal-progress">
+      <div class="goal-header">
+        <div>
+          <div class="goal-name">${obj.nome}</div>
+          <div class="goal-meta">Perfil ${obj.perfil} · ${obj.prazo} anos · Taxa estimada ${obj.perfil === 'conservador' ? '9%' : obj.perfil === 'moderado' ? '11%' : '13%'} a.a.</div>
+        </div>
+        <div class="goal-pct">${pct.toFixed(1)}%</div>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="goal-values"><span>${fmt(total)} acumulado</span><span>Meta: ${fmt(obj.valor)}</span></div>
+    </div>` :
+    `<div class="goal-progress"><div class="empty-state">
+      <div class="empty-icon">🎯</div>
+      <div class="empty-title">Nenhum objetivo definido</div>
+      <div class="empty-text">Acesse a aba <b>Objetivo</b> para definir sua meta financeira e ativar as projeções.</div>
+    </div></div>`;
+
+  renderChart(proj, meta);
+}
+
+function renderChart(pts, meta) {
+  const wrap = document.getElementById('chart-area');
+  if (!pts.length) {
+    wrap.innerHTML = '<div style="text-align:center;color:var(--text3);padding:80px 20px">Defina um objetivo para visualizar a projeção de patrimônio</div>';
+    return;
+  }
+  const W = wrap.offsetWidth || 640;
+  const H = 280, ml = 72, mr = 24, mt = 20, mb = 40;
+  const cW = W - ml - mr, cH = H - mt - mb;
+  const maxVal = Math.max(...pts.map(p => p.valor), meta || 0) * 1.08;
+  const xS = i => (i / (pts.length - 1)) * cW + ml;
+  const yS = v => H - mb - (v / maxVal) * cH;
+
+  const pathD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + xS(i).toFixed(1) + ',' + yS(p.valor).toFixed(1)).join(' ');
+  const areaD = pathD + ` L${xS(pts.length - 1).toFixed(1)},${(H - mb)} L${xS(0).toFixed(1)},${(H - mb)} Z`;
+  const metaY = meta > 0 ? yS(meta) : null;
+  const crossIdx = pts.findIndex(p => p.valor >= meta);
+
+  const step = Math.ceil(pts.length / 7);
+  const labels = pts.filter((_, i) => i === 0 || i === pts.length - 1 || i % step === 0);
+
+  const yticks = [0, 0.25, 0.5, 0.75, 1].map(f => {
+    const v = maxVal * f;
+    const label = v === 0 ? '0' : v >= 1000000 ? 'R$ ' + (v / 1000000).toFixed(1) + 'M' : 'R$ ' + (v / 1000).toFixed(0) + 'k';
+    return { y: yS(v).toFixed(1), label };
+  });
+
+  wrap.innerHTML = `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#c9a84c" stop-opacity="0.4"/>
+        <stop offset="100%" stop-color="#c9a84c" stop-opacity="0.02"/>
+      </linearGradient>
+    </defs>
+    ${yticks.map(t => `
+      <line x1="${ml}" y1="${t.y}" x2="${W - mr}" y2="${t.y}" stroke="#2a3a5c" stroke-width="0.5" stroke-dasharray="3 3"/>
+      <text x="${ml - 6}" y="${t.y}" dominant-baseline="middle" text-anchor="end" fill="#64748b" font-size="10" font-family="'Segoe UI',sans-serif">${t.label}</text>`).join('')}
+    ${metaY !== null ? `
+      <line x1="${ml}" y1="${metaY.toFixed(1)}" x2="${W - mr}" y2="${metaY.toFixed(1)}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="${W - mr - 4}" y="${(parseFloat(metaY) - 5).toFixed(1)}" text-anchor="end" fill="#34d399" font-size="10" font-family="'Segoe UI',sans-serif" font-weight="bold">META</text>` : ''}
+    <path d="${areaD}" fill="url(#cg)"/>
+    <path d="${pathD}" fill="none" stroke="#c9a84c" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    ${crossIdx >= 0 ? `
+      <circle cx="${xS(crossIdx).toFixed(1)}" cy="${yS(pts[crossIdx].valor).toFixed(1)}" r="7" fill="#10b981" stroke="#0a0f1e" stroke-width="2.5"/>
+      <text x="${xS(crossIdx).toFixed(1)}" y="${(yS(pts[crossIdx].valor) - 13).toFixed(1)}" text-anchor="middle" fill="#34d399" font-size="10" font-weight="bold" font-family="'Segoe UI',sans-serif">✓ META</text>` : ''}
+    ${labels.map(p => {
+      const i = pts.indexOf(p);
+      return `<text x="${xS(i).toFixed(1)}" y="${H - 6}" text-anchor="middle" fill="#64748b" font-size="10" font-family="'Segoe UI',sans-serif">${p.label}</text>`;
+    }).join('')}
+    <line x1="${ml}" y1="${mt}" x2="${ml}" y2="${H - mb}" stroke="#2a3a5c" stroke-width="1"/>
+    <line x1="${ml}" y1="${H - mb}" x2="${W - mr}" y2="${H - mb}" stroke="#2a3a5c" stroke-width="1"/>
+  </svg>`;
+}
+
+// ── OBJETIVO ──────────────────────────────────────────────────────────────────
+function renderObjetivo() {
+  const obj  = getData('objetivo');
+  const wrap = document.getElementById('objetivo-content');
+  if (!obj) {
+    wrap.innerHTML = `
+      <div class="onboard-card">
+        <div class="onboard-title">Defina seu norte financeiro 🎯</div>
+        <div class="onboard-sub">O objetivo é a âncora de todo o planejamento. Com base nele, o sistema calcula projeções, recomenda como distribuir os aportes mensais e indica se você está no caminho certo.</div>
+        <button class="btn-primary" onclick="openModal('modal-objetivo')">Definir meu objetivo agora</button>
+      </div>`;
+    return;
+  }
+  const total = getTotalAportado();
+  const pct   = Math.min(100, (total / Number(obj.valor) * 100));
+  const proj  = getProjecao();
+  const crossIdx = proj.findIndex(p => p.valor >= Number(obj.valor));
+  const prazoReal = crossIdx >= 0 ? proj[crossIdx].label : 'Acima do prazo definido';
+  const taxaStr = { conservador: '9% a.a.', moderado: '11% a.a.', arrojado: '13% a.a.' }[obj.perfil] || '11% a.a.';
+
+  wrap.innerHTML = `
+    <div class="onboard-card">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:20px">
+        <div>
+          <div class="onboard-title" style="margin-bottom:2px">${obj.nome}</div>
+          <div style="color:var(--text3);font-size:12px">Perfil ${obj.perfil} · Taxa estimada ${taxaStr}</div>
+        </div>
+        <button class="btn-sm" onclick="openModal('modal-objetivo')">✏️ Editar</button>
+      </div>
+      <div class="cards-grid" style="grid-template-columns:1fr 1fr;margin-bottom:20px">
+        <div class="stat-card"><div class="stat-label">Meta</div><div class="stat-value" style="font-size:18px">${fmt(obj.valor)}</div></div>
+        <div class="stat-card"><div class="stat-label">Prazo definido</div><div class="stat-value" style="font-size:18px">${obj.prazo} anos</div></div>
+        <div class="stat-card"><div class="stat-label">Aporte mensal</div><div class="stat-value" style="font-size:18px">${fmt(obj.aporte)}</div></div>
+        <div class="stat-card"><div class="stat-label">Prazo real estimado</div><div class="stat-value" style="font-size:18px">${prazoReal}</div></div>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+      <div class="goal-values" style="margin-top:8px"><span>${fmt(total)} já acumulado</span><span>${pct.toFixed(1)}% da meta</span></div>
+      <div style="margin-top:20px;background:var(--card2);border-left:3px solid var(--gold-dim);border-radius:0 8px 8px 0;padding:14px 16px;font-size:13px;color:var(--text2);line-height:1.7">
+        <b style="color:var(--gold2)">💡 Cerbasi explica:</b> Um objetivo claro com prazo e valor definidos é o que separa quem chega ao destino de quem apenas poupa sem direção. Manter o foco no número final é o que impede decisões emocionais nos momentos de volatilidade.
+      </div>
+    </div>`;
+}
+
+// ── ALOCAÇÃO ──────────────────────────────────────────────────────────────────
+const CLASSES = [
+  { nome: 'Renda Fixa',     cor: '#3b82f6', desc: 'Tesouro, CDB, LCI/LCA' },
+  { nome: 'Ações',          cor: '#c9a84c', desc: 'ETFs, fundos, BDRs'    },
+  { nome: 'FIIs',           cor: '#10b981', desc: 'Fundos imobiliários'    },
+  { nome: 'Internacional',  cor: '#8b5cf6', desc: 'ETF global, BDR'        },
+  { nome: 'Reserva',        cor: '#64748b', desc: 'Emergência / liquidez'  },
+];
+
+const IDEAIS = {
+  conservador: { 'Renda Fixa': 55, 'Ações': 15, 'FIIs': 15, 'Internacional': 10, 'Reserva': 5 },
+  moderado:    { 'Renda Fixa': 40, 'Ações': 25, 'FIIs': 20, 'Internacional': 10, 'Reserva': 5 },
+  arrojado:    { 'Renda Fixa': 25, 'Ações': 35, 'FIIs': 20, 'Internacional': 15, 'Reserva': 5 },
+};
+
+function renderAlocacao() {
+  const map    = getAlocacaoAtual();
+  const total  = getTotalAportado() || 1;
+  const obj    = getData('objetivo');
+  const perfil = obj?.perfil || 'moderado';
+  const alvo   = IDEAIS[perfil];
+
+  document.getElementById('alocacao-content').innerHTML = `
+    <div class="alloc-grid">
+      <div class="alloc-card">
+        <div class="alloc-title">Distribuição atual</div>
+        ${buildDonut(map, total)}
+        <div class="donut-legend">
+          ${CLASSES.map(c => {
+            const v = map[c.nome] || 0;
+            const p = ((v / total) * 100).toFixed(1);
+            return `<div class="legend-row">
+              <span class="legend-left"><span class="legend-dot" style="background:${c.cor}"></span>${c.nome}</span>
+              <span style="color:var(--text2);font-weight:600">${p}% · ${fmt(v)}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="alloc-card">
+        <div class="alloc-title">Alocação ideal — Perfil ${perfil}</div>
+        ${CLASSES.map(c => {
+          const at  = ((map[c.nome] || 0) / total * 100);
+          const id  = alvo[c.nome] || 0;
+          const diff = at - id;
+          const badge = diff > 5 ? '<span style="color:var(--red2);font-size:10px">▲ acima</span>'
+                      : diff < -5 ? '<span style="color:var(--gold2);font-size:10px">▼ abaixo</span>' : '';
+          return `<div class="alloc-bar-wrap">
+            <div class="alloc-bar-label">
+              <span style="color:var(--text2)">${c.nome}</span>
+              <span>${at.toFixed(0)}% <span style="color:var(--text3)">/ ideal ${id}%</span> ${badge}</span>
+            </div>
+            <div class="alloc-bar-bg"><div class="alloc-bar-fill" style="width:${Math.min(at, 100)}%;background:${c.cor}"></div></div>
+          </div>`;
+        }).join('')}
+        <div style="margin-top:16px;font-size:11px;color:var(--text3);line-height:1.6">
+          ▼ abaixo = direcione aportes aqui · ▲ acima = pause aportes nesta classe
+        </div>
+      </div>
+    </div>
+    <div class="aporte-form">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="aporte-title" style="margin-bottom:4px">💸 Registrar novo aporte</div>
+          <div style="color:var(--text3);font-size:12px">Cada aporte registrado atualiza automaticamente a alocação e o painel.</div>
+        </div>
+        <button class="btn-sm btn-add" onclick="openModal('modal-aporte')">+ Novo Aporte</button>
+      </div>
+    </div>`;
+}
+
+function buildDonut(map, total) {
+  const r = 60, cx = 90, cy = 80, sw = 22;
+  const slices = []; let startAngle = -90;
+  CLASSES.forEach(c => {
+    const v = map[c.nome] || 0;
+    const angle = (v / total) * 360;
+    if (angle > 0) { slices.push({ ...c, angle, startAngle }); startAngle += angle; }
+  });
+  function polar(cx, cy, r, deg) {
+    const rad = deg * Math.PI / 180;
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  }
+  const paths = slices.map(s => {
+    const st = polar(cx, cy, r, s.startAngle);
+    const en = polar(cx, cy, r, s.startAngle + s.angle);
+    const lg = s.angle > 180 ? 1 : 0;
+    return `<path d="M${cx},${cy} L${st.x.toFixed(1)},${st.y.toFixed(1)} A${r},${r},0,${lg},1,${en.x.toFixed(1)},${en.y.toFixed(1)} Z" fill="${s.cor}" opacity="0.85"/>`;
+  }).join('');
+  const hole = `<circle cx="${cx}" cy="${cy}" r="${r - sw}" fill="var(--card)"/>`;
+  const lbl  = total > 1 ? (total >= 1000000 ? 'R$ ' + (total / 1e6).toFixed(1) + 'M' : 'R$ ' + (total / 1000).toFixed(0) + 'k') : 'R$ 0';
+  const noData = slices.length === 0 ? `<text x="${cx}" y="${cy + 6}" text-anchor="middle" fill="#64748b" font-size="11" font-family="'Segoe UI',sans-serif">Sem dados</text>` : '';
+  return `<div class="donut-wrap"><svg width="180" height="160" viewBox="0 0 180 160" xmlns="http://www.w3.org/2000/svg">
+    ${slices.length === 0 ? `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#1f2d45"/>` : paths}
+    ${hole}${noData}
+    <text x="${cx}" y="${cy - 6}" text-anchor="middle" fill="#64748b" font-size="10" font-family="'Segoe UI',sans-serif">Total</text>
+    <text x="${cx}" y="${cy + 12}" text-anchor="middle" fill="#e6c06a" font-size="13" font-weight="bold" font-family="'Segoe UI',sans-serif">${lbl}</text>
+  </svg></div>`;
+}
+
+// ── CONSULTORIA ───────────────────────────────────────────────────────────────
+function renderConsultoria() {
+  const obj    = getData('objetivo');
+  const wrap   = document.getElementById('consultoria-content');
+  if (!obj) {
+    wrap.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">💡</div>
+      <div class="empty-title">Defina seu objetivo primeiro</div>
+      <div class="empty-text">Sem um objetivo cadastrado, não é possível gerar orientações personalizadas. Acesse a aba <b>Objetivo</b>.</div>
+    </div>`;
+    return;
+  }
+
+  const map    = getAlocacaoAtual();
+  const total  = getTotalAportado() || 1;
+  const perfil = obj.perfil || 'moderado';
+  const alvo   = IDEAIS[perfil];
+  const taxaStr = { conservador: '9%', moderado: '11%', arrojado: '13%' }[perfil] || '11%';
+  const anoMeta = new Date().getFullYear() + Number(obj.prazo || 0);
+
+  // Detecta desequilíbrios
+  const alertas = [];
+  CLASSES.forEach(c => {
+    const at = (map[c.nome] || 0) / total * 100;
+    const id = alvo[c.nome] || 0;
+    if (at > id + 8) alertas.push({ classe: c.nome, tipo: 'rebalancear', at, id });
+    if (at < id - 8 && total > 100) alertas.push({ classe: c.nome, tipo: 'comprar', at, id });
+  });
+
+  const reserva = map['Reserva'] || 0;
+  const reservaIdeal = Number(obj.aporte || 0) * 6;
+
+  const cards = [
+    {
+      titulo: '📍 Direcionamento do aporte deste mês',
+      texto: perfil === 'conservador'
+        ? 'Para seu perfil conservador: direcione 55% em Renda Fixa (priorize Tesouro IPCA+ com vencimento próximo ao seu prazo), 15% em FIIs de tijolo com histórico consolidado, 15% em Ações via ETF (BOVA11), e 10% em ativos internacionais (IVVB11 ou similar). Os 5% restantes para reserva de liquidez.'
+        : perfil === 'moderado'
+        ? 'Para seu perfil moderado: 40% em Renda Fixa (Tesouro IPCA+ e Selic), 25% em Ações via ETF diversificado (BOVA11 + IVVB11), 20% em FIIs e 10% em ativos internacionais. Mantenha 5% em liquidez imediata (Tesouro Selic ou CDB diário).'
+        : 'Para seu perfil arrojado: 35% em Ações (ETFs + ações individuais com análise fundamentalista), 25% em Renda Fixa como proteção anti-cíclica, 20% em FIIs e 15% em fundos globais. A Renda Fixa aqui não é conservadorismo — é a âncora que permite assumir risco nas demais classes.',
+      teoria: 'Ray Dalio — All Weather: a alocação estratégica entre classes de ativos é mais determinante para o resultado de longo prazo do que a escolha individual de papéis. Uma carteira bem diversificada atravessa qualquer ciclo econômico com consistência e previsibilidade.',
+      badge: '📋 Estratégia', badgeClass: 'badge-aguardar'
+    },
+    {
+      titulo: '🔐 Reserva de emergência',
+      texto: reserva >= reservaIdeal && reservaIdeal > 0
+        ? `Sua reserva está em ${fmt(reserva)}, adequada ao parâmetro de 6 meses de aportes (${fmt(reservaIdeal)}). Mantenha em Tesouro Selic ou CDB com liquidez diária — nunca em investimentos de longo prazo ou com carência.`
+        : reserva > 0
+        ? `Sua reserva está em ${fmt(reserva)}, ainda abaixo do ideal de ${fmt(reservaIdeal)} (6 meses de aportes). Antes de ampliar outras classes, complete a reserva. Isso evita que você seja forçado a vender ativos no pior momento.`
+        : `Você ainda não registrou nenhum valor na classe Reserva. O recomendado é ter ${fmt(reservaIdeal)} guardados em Tesouro Selic ou CDB com liquidez diária antes de qualquer outro investimento.`,
+      teoria: 'Benjamin Graham — A margem de segurança não existe apenas no preço de compra de um ativo. Ela existe também na estrutura do portfólio. Sem reserva de emergência, o investidor é obrigado a resgatar investimentos no momento de baixa — exatamente quando deveria comprar mais.',
+      badge: reserva >= reservaIdeal && reservaIdeal > 0 ? '✅ Adequada' : '⚠️ Atenção',
+      badgeClass: reserva >= reservaIdeal && reservaIdeal > 0 ? 'badge-comprar' : 'badge-rebalancear'
+    },
+    ...alertas.map(a => ({
+      titulo: a.tipo === 'rebalancear' ? `⚖️ Rebalancear: ${a.classe}` : `📈 Oportunidade de aporte: ${a.classe}`,
+      texto: a.tipo === 'rebalancear'
+        ? `${a.classe} representa ${a.at.toFixed(0)}% da sua carteira, acima do ideal de ${a.id}% para o perfil ${perfil}. Pause os aportes nessa classe por 1-2 meses e direcione o valor para as classes que estão abaixo do alvo.`
+        : `${a.classe} está com apenas ${a.at.toFixed(0)}% da carteira, abaixo do ideal de ${a.id}% para o perfil ${perfil}. Os próximos aportes devem priorizar essa classe até ela atingir o percentual alvo.`,
+      teoria: a.tipo === 'rebalancear'
+        ? 'Dalio: rebalancear não é tentar acertar o timing de mercado — é manter a disciplina da diversificação quando os retornos recentes tentam você a concentrar. Portfólios concentrados geram retornos ótimos em ciclos favoráveis e desastres nos ciclos adversos.'
+        : 'Graham: comprar o que está abaixo do alvo de alocação é uma forma sistemática de comprar barato sem depender de análise subjetiva. É a margem de segurança aplicada à estrutura da carteira.',
+      badge: a.tipo === 'rebalancear' ? '⚖️ Rebalancear' : '📈 Comprar',
+      badgeClass: a.tipo === 'rebalancear' ? 'badge-rebalancear' : 'badge-comprar'
+    })),
+    {
+      titulo: `🗓️ Projeção: meta estimada em ${anoMeta}`,
+      texto: `Com aportes mensais de ${fmt(obj.aporte)} e taxa estimada de ${taxaStr} ao ano (premissa histórica para perfil ${perfil}), o modelo projeta que você alcançará ${fmt(obj.valor)} em ${obj.prazo} anos. Essa projeção assume regularidade nos aportes e reinvestimento dos rendimentos.`,
+      teoria: 'Cerbasi: o poder dos juros compostos só se manifesta com consistência ao longo do tempo. Um aporte mensal disciplinado de valor moderado supera, em qualquer horizonte acima de 10 anos, tentativas de ganho rápido com alto risco. A regularidade é a maior vantagem do investidor pessoa física.',
+      badge: '🎯 Projeção', badgeClass: 'badge-aguardar'
+    },
+    {
+      titulo: '📚 Aviso educacional',
+      texto: 'As orientações acima são baseadas em princípios educacionais de finanças pessoais e em premissas históricas do mercado brasileiro. Elas não constituem consultoria de investimentos regulada. Para decisões de maior impacto, consulte um assessor certificado (CFP® ou CNPI).',
+      teoria: 'Este sistema é de uso familiar educacional. Projeções usam taxas históricas: Conservador 9% a.a. · Moderado 11% a.a. · Arrojado 13% a.a. (médias de longo prazo do mercado brasileiro, sem garantia de rentabilidade futura).',
+      badge: '⚖️ Aviso', badgeClass: 'badge-aguardar'
+    }
+  ];
+
+  wrap.innerHTML = `<div class="advisory-grid">` +
+    cards.map(d => `
+      <div class="advisory-card">
+        <div>
+          <div class="advisory-title">${d.titulo}</div>
+          <div class="advisory-text">${d.texto}</div>
+          <div class="advisory-theory">🎓 <b>Base teórica:</b> ${d.teoria}</div>
+        </div>
+        <span class="advisory-badge ${d.badgeClass}">${d.badge}</span>
+      </div>`).join('') +
+    `</div>`;
+}
+
+// ── HISTÓRICO ─────────────────────────────────────────────────────────────────
+function renderHistorico() {
+  const aportes = (getData('aportes') || []).slice().reverse();
+  const wrap    = document.getElementById('historico-content');
+
+  const total = aportes.reduce((s, a) => s + Number(a.valor), 0);
+
+  wrap.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:13px;color:var(--text3)">${aportes.length} aportes · Total: <b style="color:var(--gold2)">${fmt(total)}</b></div>
+      <button class="btn-sm btn-add" onclick="openModal('modal-aporte')">+ Novo Aporte</button>
+    </div>
+    <div class="history-card">
+      <div class="history-header">
+        <div class="history-title">Todos os aportes registrados</div>
+      </div>
+      ${aportes.length === 0
+        ? `<div class="empty-state">
+            <div class="empty-icon">📋</div>
+            <div class="empty-title">Nenhum aporte registrado ainda</div>
+            <div class="empty-text">Clique em "+ Novo Aporte" para começar a registrar seus investimentos.</div>
+           </div>`
+        : `<table>
+            <thead><tr><th>Data</th><th>Classe</th><th>Valor</th><th>Obs.</th><th></th></tr></thead>
+            <tbody>
+              ${aportes.map((a, i) => {
+                const cls = CLASSES.find(c => c.nome === a.classe);
+                const dot = cls ? `<span style="display:inline-flex;align-items:center;gap:5px">
+                  <span style="width:7px;height:7px;border-radius:50%;background:${cls.cor};flex-shrink:0"></span>${a.classe}</span>` : a.classe;
+                const dt  = new Date(a.data + 'T12:00:00').toLocaleDateString('pt-BR');
+                const idx = aportes.length - 1 - i;
+                return `<tr>
+                  <td style="color:var(--text3)">${dt}</td>
+                  <td>${dot}</td>
+                  <td class="amount-pos">${fmt(a.valor)}</td>
+                  <td style="color:var(--text3)">${a.obs || '—'}</td>
+                  <td><button class="btn-sm" onclick="deleteAporte(${idx})" style="padding:3px 8px;font-size:11px" title="Excluir">🗑</button></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+           </table>`}
+    </div>`;
+}
+
+// ── MODAIS ────────────────────────────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  if (id === 'modal-aporte') {
+    document.getElementById('m-data').value = new Date().toISOString().split('T')[0];
+    document.getElementById('m-valor').value = '';
+    document.getElementById('m-obs').value = '';
+  }
+  if (id === 'modal-objetivo') {
+    const obj = getData('objetivo');
+    if (obj) {
+      document.getElementById('o-nome').value      = obj.nome      || '';
+      document.getElementById('o-valor').value     = obj.valor     || '';
+      document.getElementById('o-prazo').value     = obj.prazo     || '';
+      document.getElementById('o-aporte').value    = obj.aporte    || '';
+      document.getElementById('o-perfil').value    = obj.perfil    || 'moderado';
+      document.getElementById('o-patrimonio').value = obj.patrimonio || 0;
+    }
+  }
+}
+
+function closeModal() {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
+}
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+});
+
+function saveAporte() {
+  const classe = document.getElementById('m-classe').value;
+  const valor  = parseFloat(document.getElementById('m-valor').value);
+  const data   = document.getElementById('m-data').value;
+  const obs    = document.getElementById('m-obs').value.trim();
+  if (!valor || valor <= 0) { alert('Informe um valor válido para o aporte.'); return; }
+  if (!data) { alert('Informe a data do aporte.'); return; }
+  const aportes = getData('aportes') || [];
+  aportes.push({ id: Date.now(), classe, valor, data, obs });
+  setData('aportes', aportes);
+  closeModal();
+  renderHistorico();
+  renderPainel();
+  // Navega para histórico
+  document.querySelectorAll('.nav-tab').forEach((t, i) => t.classList.toggle('active', i === 4));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-historico').classList.add('active');
+}
+
+function saveObjetivo() {
+  const nome      = document.getElementById('o-nome').value.trim();
+  const valor     = parseFloat(document.getElementById('o-valor').value);
+  const prazo     = parseInt(document.getElementById('o-prazo').value);
+  const aporte    = parseFloat(document.getElementById('o-aporte').value);
+  const perfil    = document.getElementById('o-perfil').value;
+  const patrimonio = parseFloat(document.getElementById('o-patrimonio').value) || 0;
+  if (!nome)   { alert('Informe o nome do objetivo.'); return; }
+  if (!valor)  { alert('Informe o valor alvo.'); return; }
+  if (!prazo)  { alert('Informe o prazo em anos.'); return; }
+  if (!aporte) { alert('Informe o aporte mensal pretendido.'); return; }
+  setData('objetivo', { nome, valor, prazo, aporte, perfil, patrimonio });
+  closeModal();
+  renderObjetivo();
+  renderPainel();
+}
+
+function deleteAporte(idx) {
+  if (!confirm('Excluir este aporte permanentemente?')) return;
+  const aportes = getData('aportes') || [];
+  aportes.splice(idx, 1);
+  setData('aportes', aportes);
+  renderHistorico();
+  renderPainel();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderAuth();
+</script>
+</body>
+</html>
